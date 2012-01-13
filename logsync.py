@@ -1,5 +1,6 @@
 import json
 import logging
+import subprocess
 
 
 log = logging.getLogger(__name__)
@@ -12,7 +13,11 @@ class LogSyncer(object):
         self.config = config
 
     def _ssh(self, args):
-        log.info('ssh to %s: %r', self.config['host'], args)
+        host = self.config['host']
+        log.info('ssh to %s: %r', host, args)
+        output = subprocess.check_output(['ssh', host] + args)
+        log.debug('output: %r', output)
+        return output
 
     def list_remote_files(self):
         log_files_glob = '%s*' % self.config['remote-path']
