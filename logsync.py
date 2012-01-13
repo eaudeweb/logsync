@@ -1,6 +1,7 @@
 import json
 import logging
 import subprocess
+from datetime import datetime
 
 
 log = logging.getLogger(__name__)
@@ -26,7 +27,15 @@ class LogSyncer(object):
             assert path.startswith(remote_log_file)
             suffix = path[len(remote_log_file):]
             if suffix == '.1':
-                print path
+                break
+        else:
+            raise ValueError("can't find file to copy")
+
+        # linux: `stat -c %y`
+        # macos/bsd: `stat -f %m`
+        stat_output = self._ssh(['stat', '-c', '%Y', path])
+        log_change_time = datetime.fromtimestamp(int(stat_output))
+        print log_change_time
 
     def sync(self):
         self.list_remote_files()
