@@ -3,7 +3,7 @@ import logging
 
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 
 class LogSyncer(object):
@@ -12,7 +12,7 @@ class LogSyncer(object):
         self.config = config
 
     def _ssh(self, args):
-        log.debug('ssh to %s: %r', self.config['host'], args)
+        log.info('ssh to %s: %r', self.config['host'], args)
 
     def list_remote_files(self):
         self._ssh(['ls', self.config['remote-path']])
@@ -23,6 +23,6 @@ class LogSyncer(object):
 
 if __name__ == '__main__':
     import sys
-    logging.basicConfig(loglevel=logging.DEBUG)
+    logging.basicConfig(loglevel=logging.INFO)
     with open(sys.argv[1]) as f:
         LogSyncer(**json.load(f)).sync()
