@@ -15,7 +15,8 @@ class LogSyncer(object):
         log.info('ssh to %s: %r', self.config['host'], args)
 
     def list_remote_files(self):
-        self._ssh(['ls', self.config['remote-path']])
+        log_files_glob = '%s*' % self.config['remote-path']
+        self._ssh(['ls', log_files_glob])
 
     def sync(self):
         self.list_remote_files()
