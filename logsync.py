@@ -16,7 +16,7 @@ class LogSyncer(object):
     def _ssh(self, args, **popen_kwargs):
         host = self.config['host']
         ssh_args = ['ssh', host] + args
-        log.info('ssh to %s: %r', host, ssh_args)
+        log.debug('ssh to %s: %r', host, ssh_args)
         if 'stdout' in popen_kwargs:
             subprocess.check_call(ssh_args, **popen_kwargs)
         else:
@@ -25,6 +25,8 @@ class LogSyncer(object):
             return output
 
     def sync(self):
+        log.info("rotate log for %r", self.config['host'])
+
         remote_log_file = self.config['remote-path']
         log_files_glob = '%s*' % remote_log_file
         for path in self._ssh(['ls', log_files_glob]).splitlines():
@@ -50,6 +52,8 @@ class LogSyncer(object):
         }
         with open(filename, 'wb') as f:
             self._ssh(["cat '%s' | gzip" % path], stdout=f)
+
+        log.info("saved %r (%r after logrotate)", filename, delta)
 
 
 if __name__ == '__main__':
