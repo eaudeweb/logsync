@@ -20,8 +20,13 @@ class LogSyncer(object):
         return output
 
     def list_remote_files(self):
-        log_files_glob = '%s*' % self.config['remote-path']
-        self._ssh(['ls', log_files_glob])
+        remote_log_file = self.config['remote-path']
+        log_files_glob = '%s*' % remote_log_file
+        for path in self._ssh(['ls', log_files_glob]).splitlines():
+            assert path.startswith(remote_log_file)
+            suffix = path[len(remote_log_file):]
+            if suffix == '.1':
+                print path
 
     def sync(self):
         self.list_remote_files()
