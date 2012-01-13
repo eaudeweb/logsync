@@ -1,8 +1,7 @@
 import json
 import logging
 import subprocess
-from datetime import datetime
-import py
+from datetime import datetime, timedelta
 
 
 log = logging.getLogger(__name__)
@@ -43,8 +42,13 @@ class LogSyncer(object):
         now = datetime.now()
         delta = now - log_change_time
 
-        new_file = py.path.local(self.config['local-repo']).join('tmp.log.gz')
-        with new_file.open('wb') as f:
+        week = log_change_time - timedelta(days=4)
+        iso_week = week.isocalendar()
+        filename = self.config['local-pattern'] % {
+            'year': iso_week[0],
+            'week': iso_week[1]
+        }
+        with open(filename, 'wb') as f:
             self._ssh(["cat '%s' | gzip" % path], stdout=f)
 
 
