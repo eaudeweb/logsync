@@ -25,7 +25,7 @@ class LogSyncer(object):
             log.debug('output: %r', output)
             return output
 
-    def list_remote_files(self):
+    def sync(self):
         remote_log_file = self.config['remote-path']
         log_files_glob = '%s*' % remote_log_file
         for path in self._ssh(['ls', log_files_glob]).splitlines():
@@ -46,9 +46,6 @@ class LogSyncer(object):
         new_file = py.path.local(self.config['local-repo']).join('tmp.log.gz')
         with new_file.open('wb') as f:
             self._ssh(["cat '%s' | gzip" % path], stdout=f)
-
-    def sync(self):
-        self.list_remote_files()
 
 
 if __name__ == '__main__':
