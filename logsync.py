@@ -2,6 +2,7 @@ import json
 import logging
 import subprocess
 from datetime import datetime
+import py
 
 
 log = logging.getLogger(__name__)
@@ -13,12 +14,16 @@ class LogSyncer(object):
     def __init__(self, **config):
         self.config = config
 
-    def _ssh(self, args):
+    def _ssh(self, args, **popen_kwargs):
         host = self.config['host']
-        log.info('ssh to %s: %r', host, args)
-        output = subprocess.check_output(['ssh', host] + args)
-        log.debug('output: %r', output)
-        return output
+        ssh_args = ['ssh', host] + args
+        log.info('ssh to %s: %r', host, ssh_args)
+        if 'stdout' in popen_kwargs:
+            subprocess.check_call(ssh_args, **popen_kwargs)
+        else:
+            output = subprocess.check_output(ssh_args, **popen_kwargs)
+            log.debug('output: %r', output)
+            return output
 
     def list_remote_files(self):
         remote_log_file = self.config['remote-path']
@@ -35,7 +40,12 @@ class LogSyncer(object):
         # macos/bsd: `stat -f %m`
         stat_output = self._ssh(['stat', '-c', '%Y', path])
         log_change_time = datetime.fromtimestamp(int(stat_output))
-        print log_change_time
+        now = datetime.now()
+        delta = now - log_change_time
+
+        new_file = py.path.local(self.config['local-repo']).join('tmp.log.gz')
+        with new_file.open('wb') as f:
+            self._ssh(["cat '%s' | gzip" % path], stdout=f)
 
     def sync(self):
         self.list_remote_files()
