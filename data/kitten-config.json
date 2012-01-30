@@ -1,0 +1,6 @@
+{
+    "host": "kitten",
+    "remote-path": "/var/local/forum/var/log/apache/access.log",
+    "rotate-day": 7,
+    "local-pattern": "/ZeStuff/edw/logsync/data/kitten/%(year)d-%(week)02d-access.log.gz"
+}
